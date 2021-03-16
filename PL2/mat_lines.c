@@ -25,11 +25,6 @@ int main (int argc, char *argv[]) {
 
 	arg = atoi(argv[1]);
 
-	// O  meu raciocínio é que como o fork duplica todos os registos
-	// também vai duplicar o pc. Deste modo só depois do fork é que 
-	// o código vai ser executado. O que faz sentido, não vemos a 
-	// main a ser executada mais que uma vez nos exemplos.
-	
 	for (i = 0; i < MAX_LINE; i++) {
 		mat[i] = malloc(sizeof(int) * MAX_COL);
 		for (j = 0; j < MAX_COL; j++) {
