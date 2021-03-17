@@ -5,9 +5,16 @@
 #include <sys/wait.h> /* wait and macros */
 #include <time.h>
 
-#define MAX_COL 4096
-#define MAX_LINE 128
+#define MAX_COL 1048576
+#define MAX_LINE 200
 #define MAX_RANDOM 530000
+
+int procura(int **mat, int linha, int arg) {
+	int r = 0, j;
+	for (j = 0; j < MAX_COL && !r; j++) 
+		if(mat[linha][j] == arg) r++;
+	return r;
+}
 
 int main (int argc, char *argv[]) {
 	// To run through the matrix
@@ -16,6 +23,11 @@ int main (int argc, char *argv[]) {
 	int arg;
 	// Stores status from child process
 	int status;
+	// To store the result of child process
+	int r;
+	// Stores child process ID
+	pid_t pid;
+
 	// Initializes random seed;
 	srandom(time(NULL));
 
@@ -38,15 +50,22 @@ int main (int argc, char *argv[]) {
 	for(i = 0; i < MAX_LINE; i++) 
 		mat[i][i] = i;
 	
-	dprintf(1, "Linhas: ");
-	for (i = 0; i < MAX_LINE; i++) {
-		if(fork()) {
-			for(j = 0; j < MAX_COL; j++)
-				if(mat[i][j] == arg) dprintf(1, "%d \n", i);
-			close(1);
-			_exit(1);
+	dprintf(1,"Linhas: ");
+	for (i = MAX_LINE - 1; i >= 0; i--) {
+		r = procura(mat, i, arg);
+
+		// In the last cycle we don't want a new child
+		if (i == 0) _exit(r);
+
+		if( (pid = fork()) ) {
+			waitpid(pid, &status, 0);
+			if (WEXITSTATUS(status) == 1) dprintf(1, "| %d |", i - 1);
+			_exit(r);
 		}
 	}
 
-	printf("Done \n");
+	//The code doesn't get here I think
+	dprintf(1, "...");
+	return 0;
 }
+
